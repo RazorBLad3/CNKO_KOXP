@@ -24,7 +24,7 @@ namespace KOXP.Constants
         public static IntPtr GetHandle(string title)
         {
             GetWindowThreadProcessId(FindWindow(null, title), out int pid);
-            GamePID = pid; // if dc, close the client.
+            GamePID = pid; // For close the client.
             return OpenProcess(ProcessAccessFlags.All, false, pid);
         }
     }

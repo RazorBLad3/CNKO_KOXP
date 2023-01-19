@@ -3,7 +3,7 @@
     public class Address
     {
         //Pointers
-        public static int KO_PTR_MSGBOX = 0xF7E340; // E0 52 -- 09 15 48DE820F signature
+        public static int KO_PTR_MSGBOX = 0xF7E340;
 
         public static int KO_PTR_CHR = 0xF7E2F4;
 

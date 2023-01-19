@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace KOXP.Constants
+﻿namespace KOXP.Constants
 {
     public class Id
     {
@@ -13,7 +7,7 @@ namespace KOXP.Constants
         #endregion
 
         #region "Map"
-        public static int KarusEslant = 11; 
+        public static int KarusEslant = 11;
         #endregion
 
         #region "Items"

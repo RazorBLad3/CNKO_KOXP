@@ -1,15 +1,15 @@
-﻿using static KOXP.Constants.Addresses.AddressExtensions;
-using static KOXP.Constants.Addresses.AddressHandler;
-using static KOXP.Core.Processor.InventoryFunctions;
-using static KOXP.Core.Processor.CharFunctions;
-using static KOXP.Constants.Handle;
-using static KOXP.Win32.Win32Api;
-using static KOXP.Win32.Win32Enum;
-using static KOXP.Core.Helper;
-using static KOXP.Form1;
+﻿using KOXP.Common;
 using KOXP.Constants;
 using System.Diagnostics;
-using KOXP.Common;
+using static KOXP.Constants.Addresses.AddressExtensions;
+using static KOXP.Constants.Addresses.AddressHandler;
+using static KOXP.Constants.Handle;
+using static KOXP.Core.Helper;
+using static KOXP.Core.Processor.CharFunctions;
+using static KOXP.Core.Processor.InventoryFunctions;
+using static KOXP.Form1;
+using static KOXP.Win32.Win32Api;
+using static KOXP.Win32.Win32Enum;
 
 namespace KOXP.Core.Processor
 {
@@ -68,23 +68,20 @@ namespace KOXP.Core.Processor
         public static void GetOread()
         {
             ExecuteRemoteCode("608B0D" + AlignDWORD(KO_PTR_CHR) +
-                              "6A0168" + AlignDWORD(700039000) +
+                              "6A0168" + AlignDWORD(700039000) + // Oreads id
                               "B8" + AlignDWORD(KO_PERI_PTR) +
-                              "FFD061C3");
+                              "FFD0" +
+                              "61" +
+                              "C3");
 
             Write4Byte(Read4Byte(KO_PTR_DLG) + KO_OFF_LOOT, 1);
         }
 
         public static void GetMonsterStones()
         {
-            SendPacket("99028201"); //Reach Level 10
-            SendPacket("99028301"); //Reach Level 20
-            SendPacket("99028401"); //Reach Level 30
-            SendPacket("99028501"); //Reach Level 40
-            SendPacket("99028601"); //Reach Level 50
-            SendPacket("99028701"); //Reach Level 60
-            SendPacket("99028801"); //Reach Level 70
-            SendPacket("99028901"); //Reach Level 80
+            for (int i = 2; i < 10; i++)
+                SendPacket($"99028{i}01"); //Reach Level 10 ~ 80
+
             SendPacket("99025600"); //Merchant's Daughter
             SendPacket("99025800"); //Chief Guard Patrick
             SendPacket("99026500"); //Chief Hunting I
@@ -104,30 +101,11 @@ namespace KOXP.Core.Processor
             if (TargetBase == 0)
                 return false;
 
-            if (GetTargetMaxHealth(TargetBase) != 0 && GetTargetHealth(TargetBase) == 0)
-                return false;
+            //if (GetTargetMaxHealth(TargetBase) != 0 && GetTargetHealth(TargetBase) == 0)
+            //    return false;
 
             return Distance(GetX(), GetY(), GetTargetX(TargetBase), GetTargetY(TargetBase)) <= targetSelectRange
                     && Read4Byte(TargetBase + KO_OFF_NATION) == 0 && GetTargetMoveType(TargetBase) != 4 && GetTargetState(TargetBase) != 11;
-        }
-
-        public static bool IsSelectableTarget(int TargetId = 0)
-        {
-            TargetId = TargetId > 0 ? TargetId : GetTargetId();
-
-            if (TargetId == 0)
-                return false;
-
-            int TargetBase = GetTargetBase(TargetId);
-
-            if (TargetBase == 0)
-                return false;
-
-            if (GetTargetHealth(TargetBase) != 0 && Read4Byte(TargetBase + KO_OFF_HP) == 0)
-                return false;
-
-            return Distance(GetX(), GetY(), (int)Math.Round(ReadFloat(TargetBase + KO_OFF_X)), (int)Math.Round(ReadFloat(TargetBase + KO_OFF_Y))) <= targetSelectRange
-                && Read4Byte(TargetBase + KO_OFF_NATION) == 0 && GetTargetMoveType(TargetBase) != 4 && GetTargetState(TargetBase) != 11;
         }
 
         public static int GetMobBase(int MobId)
@@ -135,11 +113,14 @@ namespace KOXP.Core.Processor
             IntPtr Addr = VirtualAllocEx(GameProcessHandle, IntPtr.Zero, 1, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
 
             ExecuteRemoteCode(
-                "608B0D" + AlignDWORD(KO_PTR_FLDB) +
-                "6A0168" + AlignDWORD(MobId) +
+                "60" +
+                "8B" +
+                "0D" + AlignDWORD(KO_PTR_FLDB) +
+                "6A01" + "68" + AlignDWORD(MobId) +
                 "BF" + AlignDWORD(KO_PTR_FMBS) +
-                "FFD7A3" + AlignDWORD(Addr) +
-            "61C3");
+                "FFD7" + "A3" + AlignDWORD(Addr) +
+                "61" + 
+                "C3");
 
             int Base = Read4Byte(Addr);
             VirtualFreeEx(GameProcessHandle, Addr, 0, MEM_RELEASE);
@@ -203,28 +184,12 @@ namespace KOXP.Core.Processor
             //SendPacket("06" + AlignDWORD(TruncateFloatGetX())[..4] + AlignDWORD(TruncateFloatGetY())[..4] + AlignDWORD(TruncateFloatGetZ())[..4] + "000000" + AlignDWORD(TruncateFloatGetX())[..4] + AlignDWORD(TruncateFloatGetY())[..4] + AlignDWORD(TruncateFloatGetZ())[..4]);
         }
 
-        public static bool IsAttackableTarget(int TargetId = 0)
-        {
-            int TargetBase = GetTargetBase(TargetId);
-
-            if (TargetBase == 0)
-                return false;
-
-            if (GetTargetMoveType(TargetBase) == 4)
-                return false;
-
-            return GetTargetMaxHealth(TargetBase) != 0 &&
-                     GetTargetHealth(TargetBase) != 0 &&
-                     Distance(GetX(), GetY(), GetTargetX(TargetBase), GetTargetY(TargetBase)) <= attackRange
-                    && Read4Byte(TargetBase + KO_OFF_NATION) != 1;
-        }
-
         public static bool IsAttackableTargetWithBase(int targetBase)
         {
             if (targetBase == 0)
                 return false;
 
-            return  Distance(GetX(), GetY(), GetTargetX(targetBase), GetTargetY(targetBase)) <= attackRange
+            return Distance(GetX(), GetY(), GetTargetX(targetBase), GetTargetY(targetBase)) <= attackRange
                     && GetTargetMoveType(targetBase) != 4 && GetTargetHealth(targetBase) != 0 && Read4Byte(targetBase + KO_OFF_NATION) == 0;
         }
 
@@ -407,8 +372,6 @@ namespace KOXP.Core.Processor
             return OutTargetList.Count;
         }
 
-
-
         public static void SelectTarget(int TargetId)
         {
             if (TargetId > 0)
@@ -463,8 +426,10 @@ namespace KOXP.Core.Processor
                     case 13:
                         {
                             if (IsInventorySlotEmpty(i) == false)
+                            {
                                 SendPacket("3B01" + AlignDWORD(i)[..2] + AlignDWORD(npcID)[..8] + AlignDWORD(GetItemId(i)));
-                            Thread.Sleep(50);
+                                Thread.Sleep(50);
+                            }
                         }
                         break;
                 }

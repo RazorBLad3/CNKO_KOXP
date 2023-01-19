@@ -472,6 +472,7 @@
             resources.ApplyResources(this.chkRunToTarget, "chkRunToTarget");
             this.chkRunToTarget.Name = "chkRunToTarget";
             this.chkRunToTarget.UseVisualStyleBackColor = true;
+            this.chkRunToTarget.CheckedChanged += new System.EventHandler(this.chkRunToTarget_CheckedChanged);
             // 
             // lstSkills
             // 
@@ -514,7 +515,7 @@
             0,
             0});
             this.txtDelay.Minimum = new decimal(new int[] {
-            700,
+            100,
             0,
             0,
             0});
@@ -1290,7 +1291,6 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.Menu.ResumeLayout(false);
             this.tabGeneral.ResumeLayout(false);
             this.groupBox10.ResumeLayout(false);

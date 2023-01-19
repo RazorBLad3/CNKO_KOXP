@@ -1,6 +1,7 @@
 ﻿using KOXP.Constants.Addresses;
-using static KOXP.Core.Helper;
+using System.Security.Cryptography.Xml;
 using static KOXP.Constants.Id;
+using static KOXP.Core.Helper;
 using static KOXP.Core.Processor.CharFunctions;
 using static KOXP.Core.Processor.Functions;
 using static KOXP.Core.Processor.InventoryFunctions;
@@ -17,12 +18,12 @@ namespace KOXP.Core.Processor
             return true;
         }
 
-        public static bool UseTimedSkill((string, int)[] Skill)
+        public static bool UseTimedSkill(string Skill)
         {
             if (Skill == null)
                 return false;
-            
-            switch (Skill[0].Item1)
+
+            switch (Skill)
             {
                 case "Wolf":
                     {
@@ -272,13 +273,12 @@ namespace KOXP.Core.Processor
             if (GetHp() == 0 || Skill == "")
                 return false;
 
+            string Class = GetClass().ToString();
             string SkillSelected = "";
 
             int Base = GetTargetBase(TargetId);
 
             int TargetX = GetTargetX(Base); int TargetY = GetTargetY(Base); int TargetZ = GetTargetZ(Base);
-
-            string Class = GetClass().ToString();
 
             int Id = GetId();
 
@@ -364,49 +364,35 @@ namespace KOXP.Core.Processor
                             return false;
                         }
 
-                        //Arc shot
-                        SendPacket("3101" + AlignDWORD(int.Parse(Class + "540"))[..8] + AlignDWORD(GetId())[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000000000000000000000000000000000000D00");
-                        Thread.Sleep(10);
-                        SendPacket("3102" + AlignDWORD(int.Parse(Class + "540"))[..8] + AlignDWORD(GetId())[..8] + AlignDWORD(TargetId)[..8] + AlignDWORD(TargetX)[..8] + AlignDWORD(TargetZ)[..4] + AlignDWORD(TargetY)[..8] + "000000000000000000000000");
-                        SendPacket("3103" + AlignDWORD(int.Parse(Class + "540"))[..8] + AlignDWORD(GetId())[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000000000000000000000000000000000000000");
-
-                        if (GetTargetMoveType(Base) == 4)
-                            return false;
-
-                        UseSkillWhileWalking();
-
-                        // Multiple Shot
                         SendPacket("3101" + AlignDWORD(int.Parse(Class + "515"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000000000000000000000000000000000000D00");
-                        Thread.Sleep(10);
+                        Thread.Sleep(20);
                         SendPacket("3102" + AlignDWORD(int.Parse(Class + "515"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000010000000000000000000000");
-                        SendPacket("3103" + AlignDWORD(int.Parse(Class + "515"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000010000000000000000000000000000000000");
 
-                        for (int i = 0; i < 2; i++)
-                        {
-                            if (Distance(GetX(), GetY(), TargetX, TargetY) <= 3 - i)
-                                SendPacket("3103" + AlignDWORD(int.Parse(Class + "515"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000010000000000000000000000000000000000");
-                        }
+                        byte multipleShotArrowCount = 3;
+
+                        if (Distance(GetX(), GetY(), TargetX, TargetY) >= 16)
+                            multipleShotArrowCount = 2;
+
+                        for (int i = 0; i < multipleShotArrowCount; i++)
+                            SendPacket("3103" + AlignDWORD(int.Parse(Class + "515"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000010000000000000000000000000000000000");
 
                         if (GetTargetMoveType(Base) == 4)
                             return false;
 
-                        // Arrow Shower
+                        byte arrowShowerCount = 3;
+
+                        if (Distance(GetX(), GetY(), TargetX, TargetY) >= 16)
+                            arrowShowerCount = 2;
+                        else if (Distance(GetX(), GetY(), TargetX, TargetY) <= 1)
+                            arrowShowerCount = 5;
+
                         SendPacket("3101" + AlignDWORD(int.Parse(Class + "555"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000000000000000000000000000000000000F00");
-                        Thread.Sleep(10);
+                        Thread.Sleep(20);
                         SendPacket("3102" + AlignDWORD(int.Parse(Class + "555"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000010000000000000000000000");
-                        SendPacket("3103" + AlignDWORD(int.Parse(Class + "555"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000010000000000000000000000000000000000");
-                        SendPacket("3104" + AlignDWORD(int.Parse(Class + "555"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + AlignDWORD(TargetX)[..8] + AlignDWORD(TargetZ)[..8] + AlignDWORD(TargetY)[..8] + "9BFFFFFF010000000000000000000000");
 
-                        for (int i = 0; i < 4; i++)
-                        {
-                            if (Distance(GetX(), GetY(), TargetX, TargetY) <= 4 - i)
-                            {
-                                SendPacket("3104" + AlignDWORD(int.Parse(Class + "555"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + AlignDWORD(TargetX)[..8] + AlignDWORD(TargetZ)[..8] + AlignDWORD(TargetY)[..8] + "9BFFFFFF" + AlignDWORD(i + 2)[..02] + "0000000000000000000000");
-                                SendPacket("3103" + AlignDWORD(int.Parse(Class + "555"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000010000000000000000000000000000000000");
-                            }
-
-                        }
-
+                        for (int i = 0; i < arrowShowerCount; i++)
+                            SendPacket("3103" + AlignDWORD(int.Parse(Class + "555"))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000010000000000000000000000000000000000");
+                        
                         return true;
                     }
             }
@@ -420,7 +406,7 @@ namespace KOXP.Core.Processor
 
                 SendPacket("3101" + AlignDWORD(int.Parse(Class + SkillSelected))[..8] + AlignDWORD(GetId())[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000000000000000000000000000000000000D00");
                 Thread.Sleep(20);
-                SendPacket("3102" + AlignDWORD(int.Parse(Class + SkillSelected))[..8] + AlignDWORD(GetId())[..8] + AlignDWORD(TargetId)[..8] + AlignDWORD(TargetX)[..8] + AlignDWORD(TargetZ)[..4] + AlignDWORD(TargetY)[..8] + "000000000000000000000000");
+                SendPacket("3102" + AlignDWORD(int.Parse(Class + SkillSelected))[..8] + AlignDWORD(GetId())[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000000000000000000000000000");
                 SendPacket("3103" + AlignDWORD(int.Parse(Class + SkillSelected))[..8] + AlignDWORD(GetId())[..8] + AlignDWORD(TargetId)[..8] + "000000000000000000000000000000000000000000000000000000000000");
 
                 return true;
@@ -460,11 +446,10 @@ namespace KOXP.Core.Processor
             if (GetHp() == 0 || Skill == "")
                 return false;
 
+            string Class = GetClass().ToString();
             string SkillSelected = "";
 
             int Base = GetTargetBase(TargetId);
-
-            string Class = GetClass().ToString();
 
             int Id = GetId();
 
@@ -507,13 +492,10 @@ namespace KOXP.Core.Processor
             if (GetHp() == 0 || Skill == "")
                 return false;
 
-            string SkillSelected = "";
-
-            int Base = GetTargetBase(TargetId);
-
             string Class = GetClass().ToString();
-
-            int Id = GetId();
+            string SkillSelected = "";
+            
+            int Base = GetTargetBase(TargetId);
 
             switch (Skill)
             {
@@ -537,7 +519,7 @@ namespace KOXP.Core.Processor
             if (!IsAttackableTargetWithBase(Base))
                 return false;
 
-            SendPacket("3103" + AlignDWORD(int.Parse(Class + SkillSelected))[..8] + AlignDWORD(Id)[..8] + AlignDWORD(TargetId)[..8] + "010000000100000000000000000000000000000000000000000000000000");
+            SendPacket("3103" + AlignDWORD(int.Parse(Class + SkillSelected))[..8] + AlignDWORD(GetId())[..8] + AlignDWORD(TargetId)[..8] + "010000000100000000000000000000000000000000000000000000000000");
 
             return true;
         }

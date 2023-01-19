@@ -1,7 +1,7 @@
-﻿using static KOXP.Core.Processor.CharFunctions;
+﻿using System.Text;
 using static KOXP.Constants.Address;
 using static KOXP.Core.Helper;
-using System.Text;
+using static KOXP.Core.Processor.CharFunctions;
 
 namespace KOXP.Constants.Addresses
 {
@@ -17,39 +17,14 @@ namespace KOXP.Constants.Addresses
             WriteProcessMemory(Handle, Address, BitConverter.GetBytes(Value), 4, 0);
         }
 
-        public static void WriteByte(IntPtr Handle, IntPtr Address, int Value)
-        {
-            WriteProcessMemory(Handle, Address, BitConverter.GetBytes(Value), 1, 0);
-        }
-
-        public static void WriteFloat(IntPtr Address, float Value)
-        {
-            WriteFloat(GameProcessHandle, Address, Value);
-        }
-
         public static void WriteFloat(long Address, float Value)
         {
             WriteFloat(GameProcessHandle, new IntPtr(Address), Value);
         }
 
-        public static void Write4Byte(IntPtr Address, int Value)
-        {
-            Write4Byte(GameProcessHandle, Address, Value);
-        }
-
         public static void Write4Byte(long Address, int Value)
         {
             Write4Byte(GameProcessHandle, new IntPtr(Address), Value);
-        }
-
-        public static void WriteByte(IntPtr Address, int Value)
-        {
-            WriteByte(GameProcessHandle, Address, Value);
-        }
-
-        public static void WriteByte(long Address, int Value)
-        {
-            WriteByte(GameProcessHandle, new IntPtr(Address), Value);
         }
 
         public static void WriteString(IntPtr Address, string Value)

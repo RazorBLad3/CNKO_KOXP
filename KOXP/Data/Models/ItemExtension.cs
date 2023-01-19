@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-namespace KOF.Data.Models;
+﻿namespace KOF.Data.Models;
 
 public class ItemExtension
 {
     public int Number { get; protected set; }
-    public int BaseId { get; protected set; } 
+    public int BaseId { get; protected set; }
     public string Name { get; protected set; }
     public int ItemBaseId { get; protected set; }
     public int TypeId { get; protected set; }

@@ -1,6 +1,6 @@
-﻿using static KOXP.Core.Processor.CharFunctions;
+﻿using KOXP.Constants.Addresses;
 using static KOXP.Constants.Address;
-using KOXP.Constants.Addresses;
+using static KOXP.Core.Processor.CharFunctions;
 
 namespace KOXP.Core.Processor
 {
@@ -45,7 +45,7 @@ namespace KOXP.Core.Processor
                 int Length = Read4Byte(InventoryBase + 0x210 + (4 * i));
 
                 if (Read4Byte(Read4Byte(Length + 0x68)) + Read4Byte(Read4Byte(Length + 0x6C)) == ItemID)
-                return i;
+                    return i;
             }
 
             return -1;
@@ -65,8 +65,8 @@ namespace KOXP.Core.Processor
         {
             for (int i = 14; i < 42; i++)
                 if (GetItemId(i) == itemID)
-                return true;
-            
+                    return true;
+
             return false;
         }
 
@@ -80,7 +80,7 @@ namespace KOXP.Core.Processor
             for (int i = 14; i < 42; i++)
                 if (GetItemId(i) == 0)
                     return i;
-            
+
             return -1;
         }
 

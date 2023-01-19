@@ -17,16 +17,6 @@ namespace KOXP.Core.Processor
             return Read4Byte(Read4Byte(KO_PTR_CHR) + KO_OFF_CLASS);
         }
 
-        public static int GetNation()
-        {
-            return Read4Byte(Read4Byte(KO_PTR_CHR) + KO_OFF_NATION);
-        }
-
-        public static int GetLv()
-        {
-            return Read4Byte(Read4Byte(KO_PTR_CHR) + KO_OFF_LVL);
-        }
-
         public static int GetWeight()
         {
             return Read4Byte(Read4Byte(KO_PTR_CHR) + KO_OFF_WEIGHT);
@@ -48,19 +38,12 @@ namespace KOXP.Core.Processor
                 return "";
 
             int Base = GetTargetBase();
-            
+
             if (Base == 0)
                 return "";
 
             int NameLen = Read4Byte(Base + KO_OFF_NAME_LEN);
             return NameLen > 15 ? ReadString(Read4Byte(Base + KO_OFF_NAME), NameLen) : ReadString(Base + KO_OFF_NAME, NameLen);
-        }
-
-        protected static short GetState()
-        {
-            int StateOffset = 0x2EC;
-
-            return ReadByte(Read4Byte(KO_PTR_CHR) + StateOffset);
         }
 
         public static int GetZoneId()
@@ -76,21 +59,6 @@ namespace KOXP.Core.Processor
         public static float GetMaxExp()
         {
             return Read4Byte(Read4Byte(KO_PTR_CHR) + KO_OFF_MAX_EXP);
-        }
-
-        public static int GetGoX()
-        {
-            return (int)Math.Round(ReadFloat(Read4Byte(KO_PTR_CHR) + KO_OFF_MOUSE_X));
-        }
-
-        public static int GetGoY()
-        {
-            return (int)Math.Round(ReadFloat(Read4Byte(KO_PTR_CHR) + KO_OFF_MOUSE_Y));
-        }
-
-        public static int GetGoZ()
-        {
-            return (int)Math.Round(ReadFloat(Read4Byte(KO_PTR_CHR) + KO_OFF_MOUSE_Z));
         }
 
         public static int TargetX()
@@ -112,17 +80,6 @@ namespace KOXP.Core.Processor
 
             int Base = GetTargetBase();
             return Base == 0 ? 0 : (int)Math.Round(ReadFloat(Base + KO_OFF_Y));
-        }
-
-        public static int TargetZ()
-        {
-            if (GetTargetId() == 0)
-            {
-                return 0;
-            }
-
-            int Base = GetTargetBase();
-            return Base == 0 ? 0 : (int)Math.Round(ReadFloat(Base + KO_OFF_Z));
         }
 
         public static int GetTargetX(int targetBase)
@@ -165,19 +122,9 @@ namespace KOXP.Core.Processor
             return ReadByte(targetBase + KO_OFF_TARGET_MOVE);
         }
 
-        public static int GetTargetStatusType(int targetBase)
-        {
-            return ReadByte(targetBase + KO_OFF_TARGET_STATU);
-        }
-
         public static int GetTargetState(int targetBase)
         {
             return ReadByte(targetBase + KO_OFF_STATE);
-        }
-
-        public static int GetTargetLvl(int targetBase)
-        {
-            return Read4Byte(targetBase + KO_OFF_LVL);
         }
 
         public static string GetTargetName(int targetBase)
@@ -185,6 +132,7 @@ namespace KOXP.Core.Processor
             int nameLen = Read4Byte(targetBase + KO_OFF_NAME_LEN);
             return nameLen > 15 ? ReadString(Read4Byte(targetBase + KO_OFF_NAME), nameLen) : ReadString(targetBase + KO_OFF_NAME, nameLen);
         }
+
         public static void Wallhack(bool Enable)
         {
             Write4Byte(Read4Byte(KO_PTR_CHR) + KO_OFF_WH, Enable ? 0 : 1);
@@ -197,7 +145,7 @@ namespace KOXP.Core.Processor
 
         public static int GetPartyBase(int Member)
         {
-            int Base = Read4Byte(Read4Byte(Read4Byte(Read4Byte(KO_PTR_DLG) + KO_OFF_PTBASE) + KO_OFF_PT)); // for id 0x2E4
+            int Base = Read4Byte(Read4Byte(Read4Byte(Read4Byte(KO_PTR_DLG) + KO_OFF_PTBASE) + KO_OFF_PT)); // for member id KO_OFF_PT = 0x2E4
 
             switch (Member)
             {
@@ -240,37 +188,9 @@ namespace KOXP.Core.Processor
             return Read4Byte(Read4Byte(KO_PTR_CHR) + KO_OFF_PET_ID);
         }
 
-        public static byte GetPetHp()
-        {
-            return (byte)Math.Round(ReadFloat(Read4Byte(Read4Byte(Read4Byte(KO_PTR_DLG) + 0x3AC) + 0x114) + 0x134));
-        }
-
-        public static byte GetPetMp()
-        {
-            return (byte)ReadFloat(Read4Byte(Read4Byte(Read4Byte(KO_PTR_DLG) + 0x3AC) + 0x110) + 0x134);
-        }
-
-        public static byte GetPetHunger()
-        {
-            return (byte)ReadFloat(Read4Byte(Read4Byte(Read4Byte(KO_PTR_DLG) + 0x3AC) + 0x120) + 0x12C);
-        }
-        public static byte GetPetExp()
-        {
-            return (byte)ReadFloat(Read4Byte(Read4Byte(Read4Byte(KO_PTR_DLG) + 0x3AC) + 0x124) + 0x134);
-        }
-
         public static int GetId()
         {
             return Read4Byte(Read4Byte(KO_PTR_CHR) + KO_OFF_ID);
-        }
-
-        public static int GetLevel()
-        {
-            return Read4Byte(Read4Byte(KO_PTR_CHR) + KO_OFF_LVL);
-        }
-        public static int GetGold()
-        {
-            return Read4Byte(Read4Byte(KO_PTR_CHR) + KO_OFF_GOLD);
         }
 
         public static int GetHp()
@@ -393,6 +313,26 @@ namespace KOXP.Core.Processor
             }
 
             return Job;
+        }
+
+        public static byte GetPetHp()
+        {
+            return (byte)Math.Round(ReadFloat(Read4Byte(Read4Byte(Read4Byte(KO_PTR_DLG) + 0x3AC) + 0x114) + 0x134));
+        }
+
+        public static byte GetPetMp()
+        {
+            return (byte)ReadFloat(Read4Byte(Read4Byte(Read4Byte(KO_PTR_DLG) + 0x3AC) + 0x110) + 0x134);
+        }
+
+        public static byte GetPetHunger()
+        {
+            return (byte)ReadFloat(Read4Byte(Read4Byte(Read4Byte(KO_PTR_DLG) + 0x3AC) + 0x120) + 0x12C);
+        }
+
+        public static byte GetPetExp()
+        {
+            return (byte)ReadFloat(Read4Byte(Read4Byte(Read4Byte(KO_PTR_DLG) + 0x3AC) + 0x124) + 0x134);
         }
     }
 }

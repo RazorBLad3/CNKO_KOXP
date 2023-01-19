@@ -1,16 +1,16 @@
+using KOXP.Common;
+//using KOXP.Data;
+using System.Diagnostics;
 using static KOXP.Constants.Addresses.AddressHandler;
-using static KOXP.Core.Processor.InventoryFunctions;
-using static KOXP.Core.Processor.SkillFunctions;
-using static KOXP.Core.Processor.CharFunctions;
-using static KOXP.Core.Processor.Functions;
-using static KOXP.Core.Processor.Skills;
 using static KOXP.Constants.Handle;
-using static KOXP.Win32.Win32Api;
 using static KOXP.Constants.Id;
 using static KOXP.Core.Helper;
-using System.Diagnostics;
-using KOXP.Common;
-using KOXP.Data;
+using static KOXP.Core.Processor.CharFunctions;
+using static KOXP.Core.Processor.Functions;
+using static KOXP.Core.Processor.InventoryFunctions;
+using static KOXP.Core.Processor.SkillFunctions;
+using static KOXP.Core.Processor.Skills;
+using static KOXP.Win32.Win32Api;
 
 namespace KOXP
 {
@@ -23,12 +23,12 @@ namespace KOXP
 
         List<PRequestList>? timeAfterPartyRequest = new() { new PRequestList() };
 
-        bool applicationReady = false;
-
+        //bool applicationReady = false;
+        List<string> targetNames = new();
         #region "Public Variables"
         public static string? Job { get; set; }
         public static (string, int, int)[]? attackSkills { get; set; }
-        public static (string, int, int, int, int)[]? timedSkills { get; set; }
+        public static (string, int, int, int)[]? timedSkills { get; set; }
         public static (string, int, int, int)[]? healSkills { get; set; }
         public static long timeAfterAttack { get; set; }
         public static long timeAfterProtectionEvent { get; set; }
@@ -188,9 +188,9 @@ namespace KOXP
         {
             if (GetAction() == EAction.Attack && GetZoneId() == KarusEslant && Environment.TickCount - waitTimeAfterTrainingAreaReturn > 15000)
             {
-                if (chkSellAllItems.Checked && InventoryIsFull() || 
-                    chkRpr.Checked && NeedRPR() || 
-                    chkArrow.Checked && NeedSupply(Arrow) || 
+                if (chkSellAllItems.Checked && InventoryIsFull() ||
+                    chkRpr.Checked && NeedRPR() ||
+                    chkArrow.Checked && NeedSupply(Arrow) ||
                     chkWolf.Checked && NeedSupply(Wolf) ||
                     chkBook.Checked && NeedSupply(Book))
                 {
@@ -297,10 +297,9 @@ namespace KOXP
                 txtPerHp.Text = $"%{Hp}";
                 txtPerMp.Text = $"%{Mp}";
 
-                string f = string.Format("%{0:N2}", Exp);
-                txtPerExp.Text = f;
+                txtPerExp.Text = string.Format("%{0:N2}", Exp);
 
-                if (DC() && chkDc.Checked)
+                if (chkDc.Checked && DC())
                 {
                     txtStatus.Text = "Disconnect";
                     txtStatus.ForeColor = Color.Red;
@@ -355,18 +354,14 @@ namespace KOXP
 
         public void LoadSkills()
         {
-            #region "Buff SC"
             lstBuffSc.Items.Clear();
             lstBuffSc.Items.AddRange(new object[]
             { "Hyper Noah", "AP 120 min", "Def SC", "AP 30 min", "Pink", "Gray", "Green", "Rich Merchant" });
-            #endregion
-
-            if (Job == null)
-                return;
 
             string Class = GetClass().ToString();
 
-            #region "Rogue"
+            if (Job == null)
+                return;
 
             if (Job.Equals("Rogue"))
             {
@@ -407,84 +402,19 @@ namespace KOXP
                     ("Blinding", 60, 60)
                 };
 
-                lstSkills.Items.Clear();
-
-                for (int i = 0; i < attackSkills.Length; i++)
+                timedSkills = new (string, int, int, int)[]
                 {
-                    lstSkills.Items.AddRange(new object[]
-                    {
-                        attackSkills[i].Item1
-                    });
-                }
-
-                timedSkills = new (string, int, int, int, int)[]
-                {
-                ("Sprint", 6, 6,int.Parse(Class + "001"), 1),
-                ("Wolf", 0, 0,int.Parse(Class + "030"), 2),
-                ("Swift", 0, 0, int.Parse(Class + "010"), 2),
-                ("Light Feet", 10, 10, int.Parse(Class + "725"), 1),
-                ("Evade", 30, 30, int.Parse(Class + "710"), 1),
-                ("Safely", 30, 30, int.Parse(Class + "730"), 1),
-                ("Scaled Skin", 30, 30, int.Parse(Class + "760"), 1),
-                ("Lupin Eyes", 9, 9, int.Parse(Class + "735"), 2),
-                ("Hide", 6, 6, int.Parse(Class + "700"), 2)
+                ("Sprint", 6, 6,int.Parse(Class + "001")),
+                ("Wolf", 0, 0,int.Parse(Class + "030")),
+                ("Swift", 0, 0, int.Parse(Class + "010")),
+                ("Light Feet", 10, 10, int.Parse(Class + "725")),
+                ("Evade", 30, 30, int.Parse(Class + "710")),
+                ("Safely", 30, 30, int.Parse(Class + "730")),
+                ("Scaled Skin", 30, 30, int.Parse(Class + "760")),
+                ("Lupin Eyes", 9, 9, int.Parse(Class + "735")),
+                ("Hide", 6, 6, int.Parse(Class + "700"))
                 };
-
-                lstTimedSkills.Items.Clear();
-
-                for (int i = 0; i < timedSkills.Length; i++)
-                {
-                    lstTimedSkills.Items.AddRange(new object[]
-                    {
-                        timedSkills[i].Item1
-                    });
-                }
             }
-            #endregion
-
-            #region "Mage"
-
-            if (Job.Equals("Mage"))
-            {
-                attackSkills = new (string, int, int)[]
-                {
-                    ("Stroke", 1, 1),
-                    ("Flash", 4, 4),
-                    ("Shiver", 4, 4),
-                    ("Flame", 4, 4),
-                    ("Cold Wave", 4, 4),
-                    ("Spark", 4, 4),
-                    ("Burn", 1, 1),
-                    ("Blaze", 6, 6),
-                    ("Fire Ball", 5, 5),
-                    ("Ignition", 1, 1),
-                    ("Fire Spear", 5, 5),
-                    ("Fire Burst", 0, 0),
-                    ("Fire Blast", 5, 5),
-                    ("Hell Fire", 5, 5),
-                    ("Fire Blade", 1, 1),
-                    ("Specter Of Fire", 1, 1),
-                    ("Inferno", 16, 16),
-                    ("Pillar Of Fire", 6, 6),
-                    ("Manes Of Fire", 1, 1),
-                    ("Fire Impact", 21, 21),
-                    ("Super Nova", 16, 16),
-                };
-
-                lstSkills.Items.Clear();
-
-                for (int i = 0; i < attackSkills.Length; i++)
-                {
-                    lstSkills.Items.AddRange(new object[]
-                    {
-                        attackSkills[i].Item1
-                    });
-                }
-            }
-
-            #endregion
-
-            #region "Warrior"
 
             if (Job.Equals("Warrior"))
             {
@@ -514,35 +444,40 @@ namespace KOXP
                     ("Provoke",15,15)
                 };
 
-                lstSkills.Items.Clear();
-
-                for (int i = 0; i < attackSkills.Length; i++)
+                timedSkills = new (string, int, int, int)[]
                 {
-                    lstSkills.Items.AddRange(new object[]
-                    {
-                        attackSkills[i].Item1
-                    });
-                }
-
-                timedSkills = new (string, int, int, int, int)[]
-                {
-                    ("Sprint", 6, 6,int.Parse(Class + "002"), 1),
-                    ("Defence", 10, 10, int.Parse(Class + "007"), 1)
+                    ("Sprint", 6, 6, int.Parse(Class + "002")),
+                    ("Defence", 10, 10, int.Parse(Class + "007"))
                 };
-
-                lstTimedSkills.Items.Clear();
-
-                for (int i = 0; i < timedSkills.Length; i++)
-                {
-                    lstTimedSkills.Items.AddRange(new object[]
-                    {
-                        timedSkills[i].Item1
-                    });
-                }
             }
-            #endregion
 
-            #region "Priest"
+            if (Job.Equals("Mage"))
+            {
+                attackSkills = new (string, int, int)[]
+                {
+                    ("Stroke", 1, 1),
+                    ("Flash", 4, 4),
+                    ("Shiver", 4, 4),
+                    ("Flame", 4, 4),
+                    ("Cold Wave", 4, 4),
+                    ("Spark", 4, 4),
+                    ("Burn", 1, 1),
+                    ("Blaze", 6, 6),
+                    ("Fire Ball", 5, 5),
+                    ("Ignition", 1, 1),
+                    ("Fire Spear", 5, 5),
+                    ("Fire Burst", 0, 0),
+                    ("Fire Blast", 5, 5),
+                    ("Hell Fire", 5, 5),
+                    ("Fire Blade", 1, 1),
+                    ("Specter Of Fire", 1, 1),
+                    ("Inferno", 16, 16),
+                    ("Pillar Of Fire", 6, 6),
+                    ("Manes Of Fire", 1, 1),
+                    ("Fire Impact", 21, 21),
+                    ("Super Nova", 16, 16),
+                };
+            }
 
             if (Job.Equals("Priest"))
             {
@@ -566,29 +501,10 @@ namespace KOXP
                     ("Helis", 0, 0),
                 };
 
-                lstSkills.Items.Clear();
-
-                for (int i = 0; i < attackSkills.Length; i++)
+                timedSkills = new (string, int, int, int)[]
                 {
-                    lstSkills.Items.AddRange(new object[]
-                    {
-                    attackSkills[i].Item1
-                    });
-                }
-
-                timedSkills = new (string, int, int, int, int)[]
-                {
-                    ("Prayer of God's Power", 6, 6, int.Parse(Class + "020"), 1),
+                    ("Prayer of God's Power", 6, 6, int.Parse(Class + "020")),
                 };
-
-                lstTimedSkills.Items.Clear();
-                for (int i = 0; i < timedSkills.Length; i++)
-                {
-                    lstTimedSkills.Items.AddRange(new object[]
-                    {
-                        timedSkills[i].Item1
-                    });
-                }
 
                 healSkills = new (string, int, int, int)[]
                 {
@@ -621,7 +537,32 @@ namespace KOXP
                     });
                 }
             }
-            #endregion
+
+            if (attackSkills == null)
+                return;
+
+            lstSkills.Items.Clear();
+
+            for (int i = 0; i < attackSkills.Length; i++)
+            {
+                lstSkills.Items.AddRange(new object[]
+                {
+                    attackSkills[i].Item1
+                });
+            }
+
+            if (timedSkills == null)
+                return;
+
+            lstTimedSkills.Items.Clear();
+            
+            for (int i = 0; i < timedSkills.Length; i++)
+            {
+                lstTimedSkills.Items.AddRange(new object[]
+                {
+                        timedSkills[i].Item1
+                });
+            }
         }
 
         private void TargetSearchAndSelect()
@@ -636,7 +577,7 @@ namespace KOXP
 
                         if (GetTargetId() > 0)
                         {
-                            if (Base == 0 || GetTargetRaceType(Base) != 0 || GetTargetMoveType(Base) == 4 || GetTargetState(Base) == 11 || GetTargetHealth(Base) == 0 && GetTargetMaxHealth(Base) != 0)
+                            if (Base == 0 || GetTargetMoveType(Base) == 4)
                             {
                                 SelectTarget(0);
                             }
@@ -651,58 +592,62 @@ namespace KOXP
                                 SelectTarget(0);
                                 Thread.Sleep(100);
                             }
-
                             else
                             {
-                                if (TargetList.Count > 0)
+                                if (lstSlot.CheckedItems.Count > 0 && chkBackToCenter.Checked)
                                 {
-                                    List<string> tName = new();
-                                    for (int i = 0; i < lstSlot.CheckedItems.Count; i++)
-                                    {
-                                        tName.Add($"{lstSlot.CheckedItems[i]}");
+                                    TargetInfo? Target = TargetList.FindAll(x =>
+                                    Distance(x.X, x.Y, centerX, centerY) <
+                                    txtTargetDist.Value && x.Name != null &&
+                                    IsSelectableTargetWithBase(x.Base) &&
+                                    lstSlot.CheckedItems.Contains(x.Name))
+                                    .GroupBy(x => Math.Pow(GetX() - x.X, 2) + Math.Pow(GetY() - x.Y, 2))
+                                    .OrderBy(x => x.Key)
+                                    ?.FirstOrDefault()
+                                    ?.FirstOrDefault();
 
-                                        if (lstSlot.CheckedItems.Count < tName.Count)
-                                            tName.Clear();
-                                    }
+                                    if (Target != null)
+                                        SelectTarget(Target.Id);
+                                    else
+                                        SelectTarget(0);
+                                }
+                                else if (lstSlot.CheckedItems.Count > 0 && chkBackToCenter.Checked == false)
+                                {
+                                    TargetInfo? TargetWithName = TargetList.FindAll(x =>
+                                    Distance(x.X, x.Y, GetX(), GetY()) <
+                                    txtTargetDist.Value && x.Name != null &&
+                                    IsSelectableTargetWithBase(x.Base) &&
+                                    lstSlot.CheckedItems.Contains(x.Name))
+                                    .GroupBy(x => Math.Pow(GetX() - x.X, 2) + Math.Pow(GetY() - x.Y, 2))
+                                    .OrderBy(x => x.Key)
+                                    ?.FirstOrDefault()
+                                    ?.FirstOrDefault();
 
-                                    if (lstSlot.CheckedItems.Count > 0 && chkBackToCenter.Checked)
-                                    {
-                                        TargetInfo? Target = TargetList.FindAll(x =>
-                                        Distance(x.X, x.Y, centerX, centerY) <
-                                        txtTargetDist.Value && x.Name != null &&
-                                        IsSelectableTargetWithBase(x.Base) &&
-                                        tName.Contains(x.Name))
-                                        .GroupBy(x => Math.Pow(GetX() - x.X, 2) + Math.Pow(GetY() - x.Y, 2))
-                                        .OrderBy(x => x.Key)
-                                        ?.FirstOrDefault()
-                                        ?.FirstOrDefault();
+                                    if (TargetWithName != null)
+                                        SelectTarget(TargetWithName.Id);
+                                    else
+                                        SelectTarget(0);
+                                }
+                                else if (lstSlot.CheckedItems.Count == 0 && chkBackToCenter.Checked)
+                                {
+                                    TargetInfo? Target = TargetList.FindAll(x =>
+                                    Distance(x.X, x.Y, centerX, centerY) <
+                                    txtTargetDist.Value &&
+                                    IsSelectableTargetWithBase(x.Base))
+                                    .GroupBy(x => Math.Pow(GetX() - x.X, 2) + Math.Pow(GetY() - x.Y, 2))
+                                    .OrderBy(x => x.Key)
+                                    ?.FirstOrDefault()
+                                    ?.FirstOrDefault();
 
-                                        if (Target != null)
-                                            SelectTarget(Target.Id);
-                                        else
-                                            SelectTarget(0);
-                                    }
-                                    else if (lstSlot.CheckedItems.Count > 0 && chkBackToCenter.Checked == false)
-                                    {
-                                        TargetInfo? TargetWithName = TargetList.FindAll(x =>
+                                    if (Target != null)
+                                        SelectTarget(Target.Id);
+                                    else
+                                        SelectTarget(0);
+                                }
+                                else if (lstSlot.CheckedItems.Count == 0 && chkBackToCenter.Checked == false)
+                                {
+                                    TargetInfo? Target = TargetList.FindAll(x =>
                                         Distance(x.X, x.Y, GetX(), GetY()) <
-                                        txtTargetDist.Value && x.Name != null &&
-                                        IsSelectableTargetWithBase(x.Base) &&
-                                        tName.Contains(x.Name)) 
-                                        .GroupBy(x => Math.Pow(GetX() - x.X, 2) + Math.Pow(GetY() - x.Y, 2))
-                                        .OrderBy(x => x.Key)
-                                        ?.FirstOrDefault()
-                                        ?.FirstOrDefault();
-
-                                        if (TargetWithName != null)
-                                            SelectTarget(TargetWithName.Id);
-                                        else
-                                            SelectTarget(0);
-                                    }
-                                    else if (lstSlot.CheckedItems.Count == 0 && chkBackToCenter.Checked)
-                                    {
-                                        TargetInfo? Target = TargetList.FindAll(x =>
-                                        Distance(x.X, x.Y, centerX, centerY) <
                                         txtTargetDist.Value &&
                                         IsSelectableTargetWithBase(x.Base))
                                         .GroupBy(x => Math.Pow(GetX() - x.X, 2) + Math.Pow(GetY() - x.Y, 2))
@@ -710,27 +655,10 @@ namespace KOXP
                                         ?.FirstOrDefault()
                                         ?.FirstOrDefault();
 
-                                        if (Target != null)
-                                            SelectTarget(Target.Id);
-                                        else
-                                            SelectTarget(0);
-                                    }
-                                    else if (lstSlot.CheckedItems.Count == 0 && chkBackToCenter.Checked == false)
-                                    {
-                                        TargetInfo? Target = TargetList.FindAll(x =>
-                                            Distance(x.X, x.Y, GetX(), GetY()) <
-                                            txtTargetDist.Value &&
-                                            IsSelectableTargetWithBase(x.Base))
-                                            .GroupBy(x => Math.Pow(GetX() - x.X, 2) + Math.Pow(GetY() - x.Y, 2))
-                                            .OrderBy(x => x.Key)
-                                            ?.FirstOrDefault()
-                                            ?.FirstOrDefault();
-
-                                        if (Target != null)
-                                            SelectTarget(Target.Id);
-                                        else
-                                            SelectTarget(0);
-                                    }
+                                    if (Target != null)
+                                        SelectTarget(Target.Id);
+                                    else
+                                        SelectTarget(0);
                                 }
                             }
                         }
@@ -764,9 +692,9 @@ namespace KOXP
                         if (timedSkills == null)
                             return;
 
-                        (string, int)[]? Skill = ChoosenTimedSkill(lstTimedSkills, timedSkills);
+                        string Skill = ChoosenTimedSkill(lstTimedSkills, timedSkills);
 
-                        if (Skill != null && btnEnabled.Text.Equals("Devre disi"))
+                        if (Skill != "" && btnEnabled.Text.Equals("Devre disi"))
                         {
                             UseSkillWhileWalking();
                             UseTimedSkill(Skill);
@@ -788,7 +716,7 @@ namespace KOXP
             }
         }
 
-        private (string,int)[]? ChoosenTimedSkill(CheckedListBox SkillList, (string, int, int, int, int)[] Skills)
+        private string ChoosenTimedSkill(CheckedListBox SkillList, (string, int, int, int)[] Skills)
         {
             int Choosen = -1; int Delay = -1;
 
@@ -810,15 +738,10 @@ namespace KOXP
             }
 
             if (Choosen == -1)
-                return null;
+                return "";
 
-            (string, int)[]? choosenTSkill = new (string, int)[]
-            {
-                (Skills[Choosen].Item1, Skills[Choosen].Item4)
-            };
-
-            try { return choosenTSkill; }
-            catch { return null; }
+            try { return Skills[Choosen].Item1; }
+            catch { return ""; }
         }
 
         private string ChoosenAttackSkill(CheckedListBox SkillList, (string, int, int)[] Skills)
@@ -835,11 +758,7 @@ namespace KOXP
                         Delay = Skills[i].Item2;
                     }
                     else
-                    {
-                        //Console.ForegroundColor = ConsoleColor.DarkGreen;
-                        //Console.WriteLine($"Skill name:{Skills[i].Item1}\nElapsed time:{Skills[i].Item2}\nCooldown: {Skills[i].Item3}\nDelay: {Delay}");
                         Skills[i].Item2 += 1;
-                    }
                 }
                 else
                     Skills[i].Item2 += 1;
@@ -873,9 +792,10 @@ namespace KOXP
                         if (Skill != null && Skill != "")
                         {
                             UseSkillWhileWalking();
-                            MakeAttack(Skill, GetTargetId());
+
+                            if (MakeAttack(Skill, GetTargetId()))
+                                timeAfterAttack = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
                         }
-                        timeAfterAttack = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
                     }
                     Thread.Sleep(1);
                 };
@@ -897,13 +817,13 @@ namespace KOXP
             {
                 while (true)
                 {
-                    if (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond - timeAfterProtectionEvent >= 100)
+                    if (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond - timeAfterProtectionEvent >= 200)
                     {
                         if (chkGodMode.Checked)
                             if (GetHp() <= (GetMaxHp() * txtGodModeHp.Value / 100) || GetMp() <= (GetMaxMp() * txtGodModeMp.Value / 100))
                             {
                                 SendPacket("3106" + AlignDWORD(500344)[..8] + AlignDWORD(GetId())[..8] + AlignDWORD(GetId())[..8] + "000000000000000000000000000000000000000000000000");
-                                Thread.Sleep(10);
+                                Thread.Sleep(5);
                                 SendPacket("3103" + AlignDWORD(500344)[..8] + AlignDWORD(GetId())[..8] + AlignDWORD(GetId())[..8] + "000000000000000000000000000000000000000000000000000000000000");
                             }
 
@@ -1004,11 +924,11 @@ namespace KOXP
 
         private void StartKoxp()
         {
-            if (applicationReady != true)
-            {
-                MessageBox.Show("Uygulama yukleniyor.");
-                return;
-            }
+            //if (applicationReady != true)
+            //{
+            //    MessageBox.Show("Uygulama yukleniyor.");
+            //    return;
+            //}s
 
             if (GetId() != 0)
             {
@@ -1018,7 +938,7 @@ namespace KOXP
                 txtStatus.ForeColor = Color.Green;
 
                 Text = $"[{GetName()}]";
-                
+
                 Job = GetJob();
 
                 LoadSkills();
@@ -1026,9 +946,9 @@ namespace KOXP
 
                 CheckBoxControls();
 
-                StartThread(TimedSkillEvent);
                 StartThread(AttackEvent);
                 StartThread(TargetSearchAndSelect);
+                StartThread(TimedSkillEvent);
                 StartThread(ProtectionEvent);
 
                 if (Job.Equals("Priest"))
@@ -1059,16 +979,16 @@ namespace KOXP
 
                 SetAction(EAction.Attack);
 
-                centerX = GetX();
-                centerY = GetY();
-
                 if (chkBackToCenter.Checked)
                 {
+                    centerX = GetX();
+                    centerY = GetY();
+
                     lblCenterX.Text = centerX.ToString();
                     lblCenterY.Text = centerY.ToString();
-                }
 
-                timerBackToCenter.Enabled = chkBackToCenter.Checked;
+                    timerBackToCenter.Enabled = true;
+                }
 
                 if (GetJob() == "Warrior" || GetJob() == "Priest")
                     timerAttackR.Enabled = true;
@@ -1085,8 +1005,7 @@ namespace KOXP
 
                 timerBackToCenter.Enabled = false;
 
-                if (timerAttackR.Enabled)
-                    timerAttackR.Enabled = false;
+                timerAttackR.Enabled = false;
             }
         }
 
@@ -1167,7 +1086,7 @@ namespace KOXP
             if (chkSupplyEnable.Checked && GetZoneId() != KarusEslant)
             {
                 chkSupplyEnable.Checked = false;
-                MessageBox.Show("Karakter uygun bolge de degil.");
+                MessageBox.Show("Karakter uygun bolgede degil.");
                 return;
             }
 
@@ -1280,7 +1199,7 @@ namespace KOXP
                     if (ItemSlot != -1 && ItemSlot != UpgradeSCSlot && ItemID > 100000000 && ItemID < 370000000)
                     {
                         lblUpgStatus.ForeColor = Color.Black;
-                        lblUpgStatus.Text = "Continues...";
+                        lblUpgStatus.Text = "Devam ediyor...";
 
                         SendPacket("5B02" + "01" + "CCAF" + "0000" + AlignDWORD(ItemID) + AlignDWORD(ItemSlot - 14)[..2] +
                             AlignDWORD(UpgradeSCID) + AlignDWORD(UpgradeSCSlot - 14)[..2] +
@@ -1334,20 +1253,18 @@ namespace KOXP
         {
             if (chkPartySend.Checked)
             {
+                if (timeAfterPartyRequest == null)
+                    return;
+
                 for (int i = 0; i < lstPlayers.Items.Count; i++)
                 {
                     if (lstPlayers.GetItemChecked(i))
                     {
-                        if (timeAfterPartyRequest == null)
-                            continue;
-
-                        timeAfterPartyRequest[i].Nick = $"{lstPlayers.Items[i]}";
-
                         if (!IsPartyMember(timeAfterPartyRequest[i].Nick) && timeAfterPartyRequest[i].Second >= 13)
                         {
                             SendParty(timeAfterPartyRequest[i].Nick);
 
-                            lstPartyInfo.Items.Add(timeAfterPartyRequest[i].Nick + " - " + DateTime.Now.ToString("HH:mm:ss"));
+                            lstPartyInfo.Items.Add(timeAfterPartyRequest[i].Nick + " | " + DateTime.Now.ToString("HH:mm:ss"));
 
                             lstPartyInfo.TopIndex = lstPartyInfo.Items.Count - 1;
 
@@ -1358,7 +1275,7 @@ namespace KOXP
                 }
             }
 
-            if (chkAutoParty.Checked && GetPartyCount() == 0 && IsThereAPartyReq())
+            if (chkAutoParty.Checked && /*GetPartyCount() == 0 &&*/ IsThereAPartyReq())
                 SendPacket("2F0201");
 
             if (chkPartyControl.Checked && GetPartyCount() == 0)
@@ -1369,8 +1286,12 @@ namespace KOXP
             }
 
             lstPartyPlayers.Items.Clear();
+
             for (int i = 0; i <= GetPartyCount() - 1; i++)
                 lstPartyPlayers.Items.Add(GetPartyName(i));
+
+            if (lstPartyInfo.Items.Count > 100)
+                lstPartyInfo.Items.Clear();
         }
 
         private void btnAddNearbyPlayers_Click(object sender, EventArgs e)
@@ -1463,21 +1384,28 @@ namespace KOXP
         private void txtDelay_ValueChanged(object sender, EventArgs e)
         {
             if (txtDelay.Value < 1250 && Job == "Rogue" || txtDelay.Value < 1250 && Job == "Mage")
-                txtDelay.ForeColor= Color.Red;
+                txtDelay.ForeColor = Color.Red;
             else
-                txtDelay.ForeColor= Color.Black;
+                txtDelay.ForeColor = Color.Black;
 
             Delay = (int)txtDelay.Value;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void chkRunToTarget_CheckedChanged(object sender, EventArgs e)
         {
-            TableHandler.Load().ContinueWith((task) =>
-            {
-                applicationReady = true;
-            });
+            if (chkRunToTarget.Checked && chkRunToTarget.ForeColor != Color.Red && lstSkills.CheckedItems.Contains("Super Archer"))
+                chkRunToTarget.ForeColor = Color.Red;
+            else
+                chkRunToTarget.ForeColor = Color.Black;
+
         }
 
-
+        //private void Form1_Load(object sender, EventArgs e)
+        //{
+        //    TableHandler.Load().ContinueWith((task) =>
+        //    {
+        //        applicationReady = true;
+        //    });
+        //}
     }
 }

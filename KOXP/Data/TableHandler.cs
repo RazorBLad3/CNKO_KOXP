@@ -281,7 +281,7 @@ public static class TableHandler
         SkillTable.Add(drakiBlessing);
 
         List<int> classBaseList = new List<int>();
-        
+
         classBaseList.Add(1020);
         classBaseList.Add(1070);
         classBaseList.Add(1080);
@@ -296,7 +296,7 @@ public static class TableHandler
             SkillTable.Add(superArcher);
         });
 
-       
+
 
     }
 
@@ -421,7 +421,8 @@ public static class TableHandler
 
         var table = _tableService.GetList(_tableService.GetTable(fileName));
 
-        var model = table.Select(x => {
+        var model = table.Select(x =>
+        {
 
             List<int> itemList = new();
 

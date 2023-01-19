@@ -11,7 +11,6 @@
         public int Y { get; set; }
         public int Nation { get; set; }
         public int State { get; set; }
-        public int Statu { get; set; }
         public int MoveType { get; set; }
     }
 }

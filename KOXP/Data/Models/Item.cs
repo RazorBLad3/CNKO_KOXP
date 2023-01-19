@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace KOF.Data.Models;
+﻿namespace KOF.Data.Models;
 
 public class Item
 {
-    public int BaseId { get; protected set; } 
+    public int BaseId { get; protected set; }
     public int ExtensionNumber { get; protected set; }
     private string _Name { get; set; } = default!;
     public string Name { get => Extension != null ? $"{_Name} (+{Extension.BaseId})" : _Name; set => _Name = value; }
@@ -31,7 +25,7 @@ public class Item
     public bool IsPet { get; protected set; }
     public int ReqStatStrength { get; protected set; }
     public int ReqStatHealth { get; protected set; }
-    public int ReqStatDexterity { get; protected set; } 
+    public int ReqStatDexterity { get; protected set; }
     public int ReqStatIntellience { get; protected set; }
     public int ReqStatMagicPower { get; protected set; }
     public int ItemScrollGrade { get; protected set; }
