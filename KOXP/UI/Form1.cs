@@ -21,10 +21,8 @@ namespace KOXP
             InitializeComponent();
         }
 
-        List<PRequestList>? timeAfterPartyRequest = new() { new PRequestList() };
-
         //bool applicationReady = false;
-        List<string> targetNames = new();
+        List<PRequestList>? timeAfterPartyRequest = new() { new PRequestList() };
         #region "Public Variables"
         public static string? Job { get; set; }
         public static (string, int, int)[]? attackSkills { get; set; }
@@ -578,9 +576,7 @@ namespace KOXP
                         if (GetTargetId() > 0)
                         {
                             if (Base == 0 || GetTargetMoveType(Base) == 4)
-                            {
                                 SelectTarget(0);
-                            }
                         }
                         else
                         {
@@ -662,6 +658,7 @@ namespace KOXP
                                 }
                             }
                         }
+
                         if (chkRunToTarget.Checked && IsSelectableTargetWithBase(Base))
                             GoToTarget(GetTargetX(Base), GetTargetY(Base));
                     }
